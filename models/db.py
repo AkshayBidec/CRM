@@ -147,8 +147,192 @@ if configuration.get('scheduler.enabled'):
 # >>> rows = db(db.mytable.myfield == 'value').select(db.mytable.ALL)
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
+db.define_table(
+    'crm_customer_type',
+    Field('customer_type',type='string',length=250, required=True, notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_lead_status',
+    Field('lead_status',type='string',length=250, required=True, notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+
+db.define_table(
+    'crm_customer_details',
+    Field('customer_type',db.crm_customer_type),
+    Field('first_name',type='string',length=250, required=True, notnull=True),
+    Field('last_name',type='string',length=250, required=False, notnull=False),
+    Field('email_id',type='string',length=500, required=False, notnull=True),
+    Field('mobile_number',type='integer', required=True, notnull=True),
+    Field('firm_name',type='string',length=500, required=True, notnull=True),
+    Field('designation',type='string',length=250, required=False, notnull=False),
+    Field('firm_address',type='string',length=1000, required=False, notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_master_field_type',
+    Field('field_type_name',type='string',length=250,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_lead_field',
+    Field('feature_id',type='integer', required=True,notnull=True),
+    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_type_id',db.crm_master_field_type),
+    Field('field_values',type='string',length=250,required=False,notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_lead_field_value',
+    Field('field_id',db.crm_lead_field),
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+
+db.define_table(
+    'crm_deal_field',
+    Field('feature_id',type='integer', required=True,notnull=True),
+    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_type_id',db.crm_master_field_type),
+    Field('field_values',type='string',length=250,required=False,notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_deal_field_value',
+    Field('field_id',db.crm_deal_field),
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
+    'crm_events_field',
+    Field('feature_id',type='integer', required=True,notnull=True),
+    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_type_id',db.crm_master_field_type),
+    Field('field_values',type='string',length=250,required=False,notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_events_field_value',
+    Field('field_id',db.crm_events_field),
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
+    'crm_campaign_field',
+    Field('feature_id',type='integer', required=True,notnull=True),
+    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_type_id',db.crm_master_field_type),
+    Field('field_values',type='string',length=250,required=False,notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_campaign_field_value',
+    Field('field_id',db.crm_campaign_field),
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
+    'crm_audit_trail',
+    Field('table_name',type='string',length=500,required=True,notnull=True),
+    Field('audit_datetime',type='datetime',required=True,notnull=True),
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('function',type='string',length=500,required=True,notnull=True),
+    Field('instance_key',type='string',length=500,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False)
+)
+
+db.define_table(
+    'crm_audit_trail_value',
+    Field('audit_trail_id',db.crm_audit_trail),
+    Field('column_name',type='string',length=500,required=True,notnull=True),
+    Field('old_value',type='string',length=1000,required=True,notnull=True),
+    Field('new_value',type='string',length=1000,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False)
+)
 
 # -------------------------------------------------------------------------
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
-# auth.enable_record_versioning(db)
+auth.enable_record_versioning(db)
