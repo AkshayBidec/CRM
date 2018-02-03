@@ -30,10 +30,8 @@ if not request.env.web2py_runtime_gae:
     # ---------------------------------------------------------------------
     # if NOT running on Google App Engine use SQLite or other DB
     # ---------------------------------------------------------------------
-    db = DAL(configuration.get('db.uri'),
-             pool_size=configuration.get('db.pool_size'),
-             migrate_enabled=configuration.get('db.migrate'),
-             check_reserved=['all'])
+    db = DAL('mysql://root:@localhost/erp_crm_db',migrate=True,migrate_enabled=configuration.get('db.migrate'),check_reserved=['all'])
+
 else:
     # ---------------------------------------------------------------------
     # connect to Google BigTable (optional 'google:datastore://namespace')
@@ -202,7 +200,7 @@ db.define_table(
 db.define_table(
     'crm_lead_field',
     Field('feature_id',type='integer', required=True,notnull=True),
-    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
@@ -218,7 +216,7 @@ db.define_table(
     'crm_lead_field_value',
     Field('field_id',db.crm_lead_field),
     Field('user_id',type='integer',required=True,notnull=True),
-    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -230,7 +228,7 @@ db.define_table(
 db.define_table(
     'crm_deal_field',
     Field('feature_id',type='integer', required=True,notnull=True),
-    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
@@ -246,7 +244,7 @@ db.define_table(
     'crm_deal_field_value',
     Field('field_id',db.crm_deal_field),
     Field('user_id',type='integer',required=True,notnull=True),
-    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -257,7 +255,7 @@ db.define_table(
 db.define_table(
     'crm_events_field',
     Field('feature_id',type='integer', required=True,notnull=True),
-    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
@@ -273,7 +271,7 @@ db.define_table(
     'crm_events_field_value',
     Field('field_id',db.crm_events_field),
     Field('user_id',type='integer',required=True,notnull=True),
-    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -284,7 +282,7 @@ db.define_table(
 db.define_table(
     'crm_campaign_field',
     Field('feature_id',type='integer', required=True,notnull=True),
-    Field('form_name',type='string',type=250,required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
@@ -300,7 +298,7 @@ db.define_table(
     'crm_campaign_field_value',
     Field('field_id',db.crm_campaign_field),
     Field('user_id',type='integer',required=True,notnull=True),
-    Field('value',type='string',length=1000,required=True,notnull=True),
+    Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -314,7 +312,7 @@ db.define_table(
     Field('audit_datetime',type='datetime',required=True,notnull=True),
     Field('user_id',type='integer',required=True,notnull=True),
     Field('company_id',type='integer',required=True,notnull=True),
-    Field('function',type='string',length=500,required=True,notnull=True),
+    Field('function_operation',type='string',length=500,required=True,notnull=True),
     Field('instance_key',type='string',length=500,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -324,7 +322,7 @@ db.define_table(
 db.define_table(
     'crm_audit_trail_value',
     Field('audit_trail_id',db.crm_audit_trail),
-    Field('column_name',type='string',length=500,required=True,notnull=True),
+    Field('col_name',type='string',length=500,required=True,notnull=True),
     Field('old_value',type='string',length=1000,required=True,notnull=True),
     Field('new_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),

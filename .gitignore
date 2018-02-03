@@ -1,0 +1,11 @@
+*.log
+*.sqlite
+*.process
+*.sqllog
+*.table
+*.pyc
+sessions/*
+databases/*
+progress.log
+*.log
+databases/sql.log
