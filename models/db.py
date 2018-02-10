@@ -156,17 +156,6 @@ db.define_table(
     Field('company_id',type='integer',required=True,notnull=True)
 )
 
-db.define_table(
-    'crm_lead_status',
-    Field('lead_status',type='string',length=250, required=True, notnull=True),
-    Field('is_active',type='boolean',default=True, required=True, notnull=True),
-    Field('db_entry_time', type='datetime',  required=True, notnull=True),
-    Field('db_entered_by', type='integer',required=False,notnull=False),
-    Field('db_update_time', type='datetime', notnull=False),
-    Field('db_updated_by',type='integer',required=False,notnull=False),
-    Field('company_id',type='integer',required=True,notnull=True)
-)
-
 
 db.define_table(
     'crm_customer_details',
@@ -197,13 +186,10 @@ db.define_table(
     Field('company_id',type='integer',required=True,notnull=True)
 )
 
+
 db.define_table(
-    'crm_lead_field',
-    Field('feature_id',type='integer', required=True,notnull=True),
-    Field('form_name',type='string',length=250,required=True,notnull=True),
-    Field('field_name',type='string',length=500,required=False,notnull=False),
-    Field('field_type_id',db.crm_master_field_type),
-    Field('field_values',type='string',length=250,required=False,notnull=False),
+    'crm_lead_status',
+    Field('lead_status',type='string',length=250, required=True, notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -213,11 +199,52 @@ db.define_table(
 )
 
 db.define_table(
+    'crm_lead_field_key',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+
+db.define_table(
+    'crm_lead_field',
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('feature_id',type='integer', required=True,notnull=True),
+    Field('sequence_no',type='integer',default=0,required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_type_id',db.crm_master_field_type),
+    Field('field_values',type='string',length=250,required=False,notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
     'crm_lead_field_value',
     Field('field_id',db.crm_lead_field),
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('lead_id',db.crm_lead_field_key),
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
-    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True), # to represent that data is present or deleted
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False),
+)
+
+
+db.define_table(
+    'crm_deal_field_key',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
@@ -228,6 +255,7 @@ db.define_table(
 db.define_table(
     'crm_deal_field',
     Field('feature_id',type='integer', required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
@@ -243,9 +271,21 @@ db.define_table(
 db.define_table(
     'crm_deal_field_value',
     Field('field_id',db.crm_deal_field),
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('deal_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+
+db.define_table(
+    'crm_events_field_key',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
@@ -255,6 +295,7 @@ db.define_table(
 db.define_table(
     'crm_events_field',
     Field('feature_id',type='integer', required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
@@ -270,7 +311,8 @@ db.define_table(
 db.define_table(
     'crm_events_field_value',
     Field('field_id',db.crm_events_field),
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('event_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -279,9 +321,22 @@ db.define_table(
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
+
+db.define_table(
+    'crm_campaign_field_key',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+
 db.define_table(
     'crm_campaign_field',
     Field('feature_id',type='integer', required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
     Field('field_type_id',db.crm_master_field_type),
@@ -297,7 +352,8 @@ db.define_table(
 db.define_table(
     'crm_campaign_field_value',
     Field('field_id',db.crm_campaign_field),
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('campaign_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -312,6 +368,7 @@ db.define_table(
     Field('audit_datetime',type='datetime',required=True,notnull=True),
     Field('user_id',type='integer',required=True,notnull=True),
     Field('company_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('function_operation',type='string',length=500,required=True,notnull=True),
     Field('instance_key',type='string',length=500,required=True,notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
@@ -322,6 +379,7 @@ db.define_table(
 db.define_table(
     'crm_audit_trail_value',
     Field('audit_trail_id',db.crm_audit_trail),
+    Field('session_id',type='integer',required=True,notnull=True),
     Field('col_name',type='string',length=500,required=True,notnull=True),
     Field('old_value',type='string',length=1000,required=True,notnull=True),
     Field('new_value',type='string',length=1000,required=True,notnull=True),
