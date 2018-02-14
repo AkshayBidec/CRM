@@ -145,8 +145,10 @@ if configuration.get('scheduler.enabled'):
 # >>> rows = db(db.mytable.myfield == 'value').select(db.mytable.ALL)
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONTACT
 db.define_table(
-    'crm_customer_type',
+    'crm_contact_type',
     Field('customer_type',type='string',length=250, required=True, notnull=True),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -157,36 +159,80 @@ db.define_table(
 )
 
 
+# db.define_table(
+#     'crm_contact_details',
+#     Field('customer_type',db.crm_contact_type),
+#     Field('first_name',type='string',length=250, required=True, notnull=True),
+#     Field('last_name',type='string',length=250, required=False, notnull=False),
+#     Field('email_id',type='string',length=500, required=False, notnull=True),
+#     Field('mobile_number',type='integer', required=True, notnull=True),
+#     Field('firm_name',type='string',length=500, required=True, notnull=True),
+#     Field('designation',type='string',length=250, required=False, notnull=False),
+#     Field('firm_address',type='string',length=1000, required=False, notnull=False),
+#     Field('is_active',type='boolean',default=True, required=True, notnull=True),
+#     Field('db_entry_time', type='datetime',  required=True, notnull=True),
+#     Field('db_entered_by', type='integer',required=False,notnull=False),
+#     Field('db_update_time', type='datetime', notnull=False),
+#     Field('db_updated_by',type='integer',required=False,notnull=False),
+#     Field('company_id',type='integer',required=True,notnull=True)
+# )
+
+
 db.define_table(
-    'crm_customer_details',
-    Field('customer_type',db.crm_customer_type),
-    Field('first_name',type='string',length=250, required=True, notnull=True),
-    Field('last_name',type='string',length=250, required=False, notnull=False),
-    Field('email_id',type='string',length=500, required=False, notnull=True),
-    Field('mobile_number',type='integer', required=True, notnull=True),
-    Field('firm_name',type='string',length=500, required=True, notnull=True),
-    Field('designation',type='string',length=250, required=False, notnull=False),
-    Field('firm_address',type='string',length=1000, required=False, notnull=False),
+    'crm_contact_field_key',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+
+db.define_table(
+    'crm_contact_field',
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('feature_id',type='integer', required=True,notnull=True),
+    Field('sequence_no',type='integer',default=0,required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_widget_attributes',type='string',length=500,required=False,notnull=False),
+    Field('field_requires_attributes',type='string',length=500,required=False,notnull=False),
+    Field('field_suggestion_attributes',type='string',length=500,required=False,notnull=False),            
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
-    Field('db_updated_by',type='integer',required=False,notnull=False),
-    Field('company_id',type='integer',required=True,notnull=True)
+    Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
 db.define_table(
-    'crm_master_field_type',
-    Field('field_type_name',type='string',length=250,required=True,notnull=True),
-    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    'crm_contact_field_value',
+    Field('field_id',db.crm_contact_field),
+    Field('contact_id',db.crm_contact_field_key),
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('field_value',type='string',length=1000,required=True,notnull=True),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True), # to represent that data is present or deleted
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
     Field('db_updated_by',type='integer',required=False,notnull=False),
-    Field('company_id',type='integer',required=True,notnull=True)
 )
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# db.define_table(
+#     'crm_master_field_type',
+#     Field('field_type_name',type='string',length=250,required=True,notnull=True),
+#     Field('is_active',type='boolean',default=True, required=True, notnull=True),
+#     Field('db_entry_time', type='datetime',  required=True, notnull=True),
+#     Field('db_entered_by', type='integer',required=False,notnull=False),
+#     Field('db_update_time', type='datetime', notnull=False),
+#     Field('db_updated_by',type='integer',required=False,notnull=False),
+#     Field('company_id',type='integer',required=True,notnull=True)
+# )
 
-
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ LEAD
 db.define_table(
     'crm_lead_status',
     Field('lead_status',type='string',length=250, required=True, notnull=True),
@@ -208,7 +254,6 @@ db.define_table(
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
-
 db.define_table(
     'crm_lead_field',
     Field('company_id',type='integer',required=True,notnull=True),
@@ -217,8 +262,9 @@ db.define_table(
     Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
-    Field('field_type_id',db.crm_master_field_type),
-    Field('field_values',type='string',length=250,required=False,notnull=False),
+    Field('field_widget_attributes',type='string',length=500,required=False,notnull=False),
+    Field('field_requires_attributes',type='string',length=500,required=False,notnull=False),
+    Field('field_suggestion_attributes',type='string',length=500,required=False,notnull=False),            
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -240,7 +286,7 @@ db.define_table(
     Field('db_updated_by',type='integer',required=False,notnull=False),
 )
 
-
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DEAL
 db.define_table(
     'crm_deal_field_key',
     Field('user_id',type='integer',required=True,notnull=True),
@@ -258,7 +304,6 @@ db.define_table(
     Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
-    Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -281,7 +326,7 @@ db.define_table(
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
-
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ EVENT
 db.define_table(
     'crm_events_field_key',
     Field('user_id',type='integer',required=True,notnull=True),
@@ -298,7 +343,6 @@ db.define_table(
     Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
-    Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -321,7 +365,7 @@ db.define_table(
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
-
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CAMPAIGN
 db.define_table(
     'crm_campaign_field_key',
     Field('user_id',type='integer',required=True,notnull=True),
@@ -339,7 +383,6 @@ db.define_table(
     Field('session_id',type='integer',required=True,notnull=True),
     Field('form_name',type='string',length=250,required=True,notnull=True),
     Field('field_name',type='string',length=500,required=False,notnull=False),
-    Field('field_type_id',db.crm_master_field_type),
     Field('field_values',type='string',length=250,required=False,notnull=False),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -361,7 +404,7 @@ db.define_table(
     Field('db_update_time', type='datetime', notnull=False),
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
-
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ AUDIT
 db.define_table(
     'crm_audit_trail',
     Field('table_name',type='string',length=500,required=True,notnull=True),
