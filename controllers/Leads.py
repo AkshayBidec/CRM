@@ -1,8 +1,10 @@
 
 from datetime import datetime
 from gluon.tools import Service
+from xmlrpc.server import SimpleXMLRPCServer
 service = Service(globals())
-import cPickle
+import _pickle as cPickle
+#import xmlrpc.client as xmlrpclib
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc

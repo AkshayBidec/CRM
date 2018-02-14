@@ -2,7 +2,9 @@
 from datetime import datetime
 from gluon.tools import Service
 service = Service(globals())
-import cPickle
+import _pickle as cPickle
+from xmlrpc.server import SimpleXMLRPCServer
+#import xmlrpc.client as xmlrpclib
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
@@ -79,6 +81,32 @@ def add_contact(data):
 
 	if done==1:
 		return("contact added")
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def ajax_contact_list(lCompanyName):
+	data = '%'+lCompanyName+'%'
+	lCompanyList = {}
+	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field.field_name == 'company_name') & (db.crm_contact_field_value.is_active == True) & (db.crm_contact_field_value.field_value.like(data,case_sensitive=False))).select(db.crm_contact_field_value.field_value,db.crm_contact_field_value.contact_id)
+	for row in rows:
+		lCompanyList[str(row.contact_id)] = row.field_value
+		pass
+	return lCompanyList
+	pass
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#@service.xmlrpc
+def ajax_company_details():
+	lCompanyId = 1
+	lCompanyDetails = {}
+	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field_value.contact_id == lCompanyId)).select(db.crm_contact_field.field_name,db.crm_contact_field_value.field_value)
+	for row in rows:
+		lCompanyDetails[row.crm_contact_field.field_name] = row.crm_contact_field_value.field_value
+		pass
+	da=type(str(rows[0].crm_contact_field.field_name))
+	return locals()
+	pass
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 def call(): return service() 
@@ -88,4 +116,3 @@ def call(): return service()
 
 def autocomplete():
 	if not request.vars.data: return ''
-
