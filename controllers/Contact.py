@@ -95,16 +95,14 @@ def ajax_contact_list(lCompanyName):
 	pass
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#@service.xmlrpc
-def ajax_company_details():
-	lCompanyId = 1
+@service.xmlrpc
+def ajax_company_details(lCompanyId):
 	lCompanyDetails = {}
 	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field_value.contact_id == lCompanyId)).select(db.crm_contact_field.field_name,db.crm_contact_field_value.field_value)
 	for row in rows:
 		lCompanyDetails[row.crm_contact_field.field_name] = row.crm_contact_field_value.field_value
 		pass
-	da=type(str(rows[0].crm_contact_field.field_name))
-	return locals()
+	return lCompanyDetails
 	pass
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
