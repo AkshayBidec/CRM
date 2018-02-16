@@ -53,40 +53,46 @@ def get_company(lLimit):	# limit is a dict
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def add_company(data):
+	
 	done=0
+	lReturnDict={'lKeyId':0,'msg':''}
 	# have to enter the data into the key table first
 	try:
 		lKeyId=db.crm_company_field_key.insert(
-				user_id=data['user_id'] ,
+				user_id=data['data']['user_id'] ,
 				db_entry_time=lambda:datetime.now(),
-				db_entered_by=data['user_id'],
-				session_id=data['session_id']
+				db_entered_by=data['data']['user_id'],
+				session_id=data['data']['session_id']
 			)
+		lReturnDict['lKeyId']=int(lKeyId)
 	except Exception as e:
-		return 'error in adding company key (%s)' %e
+		lReturnDict['msg']='error in adding company key (%s)' %e
+		return lReturnDict
 	else:
-		rows=db(db.crm_company_field.field_name != None).select()
+		rows=db(db.crm_company_field.field_name).select()
 		for row in rows:
 			if row.is_active== True:
 				try:
 					db.crm_company_field_value.insert(
 						field_id=row.id ,
 						company_key_id=lKeyId ,
-						field_value=data[row.field_name] ,  # to insert the data take the respective data from the dictionary
+						field_value=data['data'][row.field_name] ,  # to insert the data take the respective data from the dictionary
 						db_entry_time=lambda:datetime.now(),
-						db_entered_by=data['user_id'],
-						company_id=data['company_id'],
-						session_id=data['session_id']
+						db_entered_by=data['data']['user_id'],
+						company_id=data['data']['company_id'],
+						session_id=data['data']['session_id']
 						)
 					pass
 				except Exception as e:
-					return 'error in adding company (%s) ' %e
-
+					lReturnDict['msg']='error in adding company data (%s)' %e
+					return lReturnDict
 				else:
 					done=1
+		pass
 
 	if done==1:
-		return("company added")
+		lReturnDict['msg']="company done"
+		return lReturnDict
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
