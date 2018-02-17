@@ -29,31 +29,56 @@ def leads_add_ff():
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
-def get_leads():	# limit is a dict 
-	lLimit={}		# this dic is to get a single data or a range of data from the api
+def get_leads(lLimit):	# limit is a dict 
+	
 
-	lLimit['countTo']=10		# total number of fieds required, replace it with request.vars.* to make it dynamin
-	lLimit['countFrom']=0		# no of the row to start from 
-	lLimit['order']='~db.crm_lead_field_key.id' 	# the name of field to order on, string will be evaluated in the api
-		
+	# lLimit={}
+	# lLimit['countTo']=10		# total number of fieds required, replace it with request.vars.* to make it dynamin
+	# lLimit['countFrom']=0		# no of the row to start from 
+	# lLimit['order']='~db.crm_lead_field_key.id' 	# the name of field to order on, string will be evaluated in the api
+	
+	
 	try:
-		# get the key values according to the request
+		
 		keys=db(db.crm_lead_field_key).select(orderby=eval(lLimit['order']),limitby=(lLimit['countFrom'],lLimit['countTo']))
-		
-		# select the field and there respective values according to the request, using the inner join
-		leads= db(db.crm_lead_field_value.field_id==db.crm_lead_field.id)(db.crm_lead_field_value.lead_key_id<=keys[0].id)(db.crm_lead_field_value.lead_key_id>=keys[-1].id).select(db.crm_lead_field_value.lead_key_id,db.crm_lead_field_value.field_value,db.crm_lead_field.field_name,orderby=~db.crm_lead_field_value.lead_key_id|db.crm_lead_field.id)
-		
-		lLeadsDict={}
 		i=0
-		for lead in leads:
-			i+=1
-			lLeadsDict[str(i)]=[str(lead.crm_lead_field_value.lead_key_id),str(lead.crm_lead_field.field_name),str(lead.crm_lead_field_value.field_value)]
+		data={}
+		for  i in range (0,len(keys)):
 
+			company_data= db(db.crm_contact_field_key.id == keys[i].contact_key_id).select(
+				db.crm_contact_field_key.id,
+				db.crm_company_field_value.field_value,
+				left=db.crm_company_field_value.on(db.crm_company_field_value.company_key_id == db.crm_contact_field_key.company_key_id)
+				).as_list()
+
+			lead_data=db(db.crm_lead_field_value.lead_key_id==keys[i].id).select(
+					db.crm_lead_field_value.field_value,
+					).as_list()
+			
+			contact_data=db(db.crm_contact_field_value.contact_key_id== keys[i].contact_key_id).select(
+					db.crm_contact_field_value.field_value,
+					db.crm_contact_field_value.contact_key_id
+					).as_list()
+		
+			data[str(i)]={
+				'Company':company_data[0]['crm_company_field_value']['field_value'],
+				'Name':str(contact_data[0]['field_value'])+' '+str(contact_data[1]['field_value']),
+				'Email':str(contact_data[6]['field_value']),
+				'Phone':str(company_data[3]['crm_company_field_value']['field_value']),
+				'Lead Source':lead_data[0]['field_value'],
+				'Description':lead_data[5]['field_value'],
+				'Status':lead_data[1]['field_value']
+			}
+			pass
 
 	except Exception as e:
-		return 'error in getting data (%s)' %e
+		return e
+
 	else:
-		return lLeadsDict
+		return data
+
+
+	
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
