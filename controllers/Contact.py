@@ -136,12 +136,12 @@ def add_contact_company(data):
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
-def ajax_contact_list(lCompanyName):
+def ajax_company_list(lCompanyName,lSessionCompanyId):
 	data = '%'+lCompanyName+'%'
 	lCompanyList = {}
-	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field.field_name == 'company_name') & (db.crm_contact_field_value.is_active == True) & (db.crm_contact_field_value.field_value.like(data,case_sensitive=False))).select(db.crm_contact_field_value.field_value,db.crm_contact_field_value.contact_id)
+	rows = db((db.crm_company_field.id == db.crm_company_field_value.field_id) & (db.crm_company_field.field_name == 'company_name') & (db.crm_company_field_value.is_active == True) & (db.crm_company_field_value.company_id == lSessionCompanyId) & (db.crm_company_field_value.field_value.like(data,case_sensitive=False))).select(db.crm_company_field_value.field_value,db.crm_company_field_value.company_key_id)
 	for row in rows:
-		lCompanyList[str(row.contact_id)] = row.field_value
+		lCompanyList[str(row.company_key_id)] = row.field_value
 		pass
 	return lCompanyList
 	pass
@@ -150,11 +150,42 @@ def ajax_contact_list(lCompanyName):
 @service.xmlrpc
 def ajax_company_details(lCompanyId):
 	lCompanyDetails = {}
-	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field_value.contact_id == lCompanyId)).select(db.crm_contact_field.field_name,db.crm_contact_field_value.field_value)
+	rows = db((db.crm_company_field.id == db.crm_company_field_value.field_id) & (db.crm_company_field_value.company_key_id == lCompanyId)).select(db.crm_company_field.field_name,db.crm_company_field_value.field_value)
 	for row in rows:
-		lCompanyDetails[row.crm_contact_field.field_name] = row.crm_contact_field_value.field_value
+		lCompanyDetails[row.crm_company_field.field_name] = row.crm_company_field_value.field_value
 		pass
 	return lCompanyDetails
+	pass
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def ajax_company_contact_list(lFirstName,lCompanyKeyId,lSessionCompanyId):
+
+	data = '%'+lFirstName+'%'
+	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field_key.id == db.crm_contact_field_value.contact_key_id) & (db.crm_contact_field.field_name == 'first_name') & (db.crm_contact_field_value.is_active == True) & (db.crm_contact_field_value.company_id == lSessionCompanyId) & (db.crm_contact_field_key.company_key_id == lCompanyKeyId) & (db.crm_contact_field_key.company_key_id == db.crm_company_field_value.company_key_id) & (db.crm_company_field_value.field_id == db.crm_company_field.id) & (db.crm_company_field.field_name == 'company_name') & (db.crm_contact_field_value.field_value.like(data,case_sensitive=False))).select(db.crm_contact_field_value.field_value,db.crm_contact_field_value.contact_key_id,db.crm_contact_field_key.company_key_id,db.crm_company_field_value.field_value).as_list()
+	#d=rows[0]['crm_contact_field_key']['company_key_id']
+	return rows
+	pass
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def ajax_contact_list(lFirstName,lSessionCompanyId):
+
+	data = '%'+lFirstName+'%'
+	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field_key.id == db.crm_contact_field_value.contact_key_id) & (db.crm_contact_field.field_name == 'first_name') & (db.crm_contact_field_value.is_active == True) & (db.crm_contact_field_value.company_id == lSessionCompanyId) & (db.crm_contact_field_key.company_key_id == db.crm_company_field_value.company_key_id) & (db.crm_company_field_value.field_id == db.crm_company_field.id) & (db.crm_company_field.field_name == 'company_name') & (db.crm_contact_field_value.field_value.like(data,case_sensitive=False))).select(db.crm_contact_field_value.field_value,db.crm_contact_field_value.contact_key_id,db.crm_contact_field_key.company_key_id,db.crm_company_field_value.field_value).as_list()
+	#d=rows[0]['crm_contact_field_key']['company_key_id']
+	return rows
+	pass
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def ajax_contact_details(lContactId):
+	lContactDetails = {}
+	rows = db((db.crm_contact_field.id == db.crm_contact_field_value.field_id) & (db.crm_contact_field_value.contact_key_id == lContactId)).select(db.crm_contact_field.field_name,db.crm_contact_field_value.field_value)
+	for row in rows:
+		lContactDetails[row.crm_contact_field.field_name] = row.crm_contact_field_value.field_value
+		pass
+	return lContactDetails
 	pass
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
