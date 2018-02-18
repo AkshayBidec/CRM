@@ -26,7 +26,31 @@ def company_add_ff():
 
 		del field_names['field']
 		return dict(field_names)
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def company_edit_ff(company_key_id):
+		
+		field_names={'field':'value'}
+		
+		rows = db((db.crm_company_field)
+			).select(
+			db.crm_company_field.field_widget_attributes,
+			db.crm_company_field.field_requires_attributes,
+			db.crm_company_field.field_name,
+			db.crm_company_field_value.field_value,
+			left=db.crm_company_field_value.on((db.crm_company_field_value.company_key_id == company_key_id ) & ( db.crm_company_field_value.field_id== db.crm_company_field.id))
+			)
+		
 
+		lList=[]
+		for row in rows:
+
+			lList=[row.crm_company_field.field_widget_attributes,row.crm_company_field.field_requires_attributes, row.crm_company_field_value.field_value] 		# make a list of required details for the field
+
+			field_names.update({row.crm_company_field.field_name:lList})
+
+		del field_names['field']
+		return dict(field_names)
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def get_company(lLimit):	# limit is a dict 

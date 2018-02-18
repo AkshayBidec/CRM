@@ -7,11 +7,6 @@ from xmlrpc.server import SimpleXMLRPCServer
 #import xmlrpc.client as xmlrpclib
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-@service.xmlrpc
-def string(data):
-	out=data['email_id']+data['password']
-	return out
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 # function to get the field names to show the form
 @service.xmlrpc
 def contact_add_ff():
@@ -26,29 +21,123 @@ def contact_add_ff():
 
 		del field_names['field']
 		return dict(field_names)
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def contact_edit_ff(contact_key_id):
+
+		# contact_key_id=32
+		
+		field_names={'field':'value'}
+	
+		rows = db(db.crm_contact_field_value.field_id == db.crm_contact_field.id)(db.crm_contact_field_value.contact_key_id== contact_key_id).select(
+			db.crm_contact_field_value.field_value,
+			db.crm_contact_field.field_widget_attributes,
+			db.crm_contact_field.field_requires_attributes,
+			db.crm_contact_field.field_name
+			)
+		
+		lList=[]
+		for row in rows:
+
+			lList=[row.crm_contact_field.field_widget_attributes,row.crm_contact_field.field_requires_attributes,row.crm_contact_field_value.field_value] 		# make a list of required details for the field
+
+			field_names.update({row.crm_contact_field.field_name:lList})
+
+		del field_names['field']
+
+		# uncomment it if the company key id is needed and use that accordingly
+		
+		company_key_id=db(db.crm_contact_field_key.id==contact_key_id).select()[0].company_key_id
+		
+		lData={"field_names":field_names,
+			"company_key_id":company_key_id}
+
+		return lData
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def edit_contact(data):
+	
+	done=0
+	
+	lReturnDict={'lKeyId':0,'msg':''}
+	# have to enter the data into the key table first
+	
+	try:
+		db(db.crm_contact_field_key.id==data['data']['contact_key_id']).update(
+				company_key_id=data['data']['company_key_id'],
+				db_update_time=lambda:datetime.now(),
+				db_updated_by=data['data']['user_id'],
+			)
+		
+	except Exception as e:
+		lReturnDict['msg']='error in adding contact key (%s)' %e
+		return lReturnDict	
+	
+	else:
+		rows=db(db.crm_contact_field.field_name != None).select()
+		for row in rows:
+			if row.is_active== True:
+				try:
+					db(db.crm_contact_field_value.field_id==row.id)(db.crm_contact_field_value.contact_key_id==data['data']['contact_key_id']).update(
+						field_value=data['data'][row.field_name] ,  # to insert the data take the respective data from the dictionary
+						db_update_time=lambda:datetime.now(),
+						db_updated_by=data['data']['user_id']
+						)
+					pass
+				except Exception as e:
+					lReturnDict['msg']='error in adding contact data (%s)' %e
+					return lReturnDict	
+				else:
+					done=1
+
+	if done==1:
+		lReturnDict['msg']=' contact done '
+	return lReturnDict	
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def get_contact(lLimit):	# limit is a dict 
 
-	try:
-		# get the key values according to the request
-		keys=db(db.crm_contact_field_key).select(orderby=eval(lLimit['order']),limitby=(lLimit['countFrom'],lLimit['countTo']))
-		
-		# select the field and there respective values according to the request, using the inner join
-		contacts= db(db.crm_contact_field_value.field_id==db.crm_contact_field.id)(db.crm_contact_field_value.contact_key_id<=keys[0].id)(db.crm_contact_field_value.contact_key_id>=keys[-1].id).select(db.crm_contact_field_value.contact_key_id,db.crm_contact_field_value.field_value,db.crm_contact_field.field_name,orderby=~db.crm_contact_field_value.contact_key_id|db.crm_contact_field.id)
-		
-		lContactDict={}
-		i=0
-		for contact in contacts:
-			i+=1
-			lContactDict[str(i)]=[str(contact.crm_contact_field_value.contact_key_id),str(contact.crm_contact_field.field_name),str(contact.crm_contact_field_value.field_value)]
+	# # following data is for the testing only
+	# lLimit={}
+	# lLimit['countTo']=10		# total number of fieds required, replace it with request.vars.* to make it dynamin
+	# lLimit['countFrom']=0		# no of the row to start from 
+	# lLimit['order']='~db.crm_contact_field_key.id' 	# the name of field to order on, string will be evaluated in the api
 
+	try:
+		keys=db(db.crm_contact_field_key).select(orderby=eval(lLimit['order']),limitby=(lLimit['countFrom'],lLimit['countTo']))
+		i=0
+		data={}
+		for  i in range (0,len(keys)):
+
+			company_data= db(db.crm_contact_field_key.id== keys[i].id).select(
+				db.crm_contact_field_key.id,
+				db.crm_company_field_value.field_value,
+				left=db.crm_company_field_value.on(db.crm_company_field_value.company_key_id == keys[i].company_key_id)
+				).as_list()
+
+			
+			contact_data=db(db.crm_contact_field_value.contact_key_id== keys[i].id).select(
+					db.crm_contact_field_value.field_value,
+					db.crm_contact_field_value.contact_key_id
+					).as_list()
+			
+			# data[str(i)]=company_data
+			data[str(i)]={
+				'Company':company_data[0]['crm_company_field_value']['field_value'],
+				'Name':str(contact_data[0]['field_value'])+' '+str(contact_data[1]['field_value']),
+				'Email':str(contact_data[6]['field_value']),
+				'Phone':str(contact_data[5]['field_value']),
+				'Type Of Contact':contact_data[4]['field_value'],
+				'Designation':contact_data[2]['field_value'],
+				'Department':contact_data[3]['field_value']
+			}
 
 	except Exception as e:
 		return 'error in getting data (%s)' %e
 	else:
-		return lContactDict
+		return dict(data)
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
@@ -125,14 +214,6 @@ def add_contact_company_key_id(data):
 		lReturnDict['msg']=' contact updated '
 	return lReturnDict	
 
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-@service.xmlrpc
-def add_contact_company(data):
-	db(db.crm_contact_field_key.id ==data[contact_key_id]).update(
-			company_key_id=data[company_key_id]
-		)
-	return 'done'
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
