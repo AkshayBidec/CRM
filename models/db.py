@@ -250,14 +250,43 @@ db.define_table(
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ LEAD
 db.define_table(
-    'crm_lead_status',
+    'crm_lead_status_master',
     Field('lead_status',type='string',length=250, required=True, notnull=True),
+    Field('progress',type='string',length=250, required=False, notnull=False),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
     Field('db_updated_by',type='integer',required=False,notnull=False),
     Field('company_id',type='integer',required=True,notnull=True)
+)
+
+db.define_table(
+    'crm_lead_status',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('lead_status_id',db.crm_lead_status_master),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
+    'crm_lead_updates',
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('lead_status_id',db.crm_lead_status_master),
+    Field('updated_head',type='string',length=1000,required=False,notnull=False),
+    Field('updated_data',type='string',length=2000,required=False,notnull=False),
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
 db.define_table(
