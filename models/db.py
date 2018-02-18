@@ -250,6 +250,17 @@ db.define_table(
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ LEAD
 db.define_table(
+    'crm_lead_field_key',
+    Field('contact_key_id',db.crm_contact_field_key),
+    Field('user_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
     'crm_lead_status_master',
     Field('lead_status',type='string',length=250, required=True, notnull=True),
     Field('progress',type='string',length=250, required=False, notnull=False),
@@ -291,16 +302,7 @@ db.define_table(
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
 
-db.define_table(
-    'crm_lead_field_key',
-    Field('contact_key_id',db.crm_contact_field_key),
-    Field('user_id',type='integer',required=True,notnull=True),
-    Field('session_id',type='integer',required=True,notnull=True),
-    Field('db_entry_time', type='datetime',  required=True, notnull=True),
-    Field('db_entered_by', type='integer',required=False,notnull=False),
-    Field('db_update_time', type='datetime', notnull=False),
-    Field('db_updated_by',type='integer',required=False,notnull=False)
-)
+
 
 db.define_table(
     'crm_lead_field',
