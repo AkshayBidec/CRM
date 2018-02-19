@@ -193,8 +193,23 @@ def add_leads(data):
 		lReturnDict['msg']=' leads done '
 		return lReturnDict
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-def update_leads():
-	return dict()
+@service.xmlrpc
+def fetch_lead_basic_details(LRequestData):
+	
+	data = {}
+	data['lead_details'] = db((db.crm_lead_field_key.id == db.crm_lead_field_value.lead_key_id) & (db.crm_lead_field_value.field_id == db.crm_lead_field.id) & (db.crm_lead_field_value.is_active == True) & (db.crm_lead_field_value.company_id == lRequestData['company_id']) & (db.crm_lead_field_key.id == lRequestData['lead_key_id'])).select(db.crm_lead_field.field_name, db.crm_lead_field_value.field_value).as_list()
+	data['contact_details'] = db((db.crm_lead_field_key.contact_key_id == db.crm_contact_field_value.contact_key_id) & (db.crm_contact_field_value.field_id == db.crm_contact_field.id) & (db.crm_lead_field_key.id == lRequestData['lead_key_id']) & (db.crm_contact_field_value.is_active == True) & (db.crm_contact_field_value.company_id == lRequestData['company_id'])).select(db.crm_contact_field.field_name, db.crm_contact_field_value.field_value).as_list()
+	data['company_details'] = db((db.crm_lead_field_key.contact_key_id == db.crm_contact_field_key.id) & (db.crm_contact_field_key.company_key_id == db.crm_company_field_value.company_key_id) & (db.crm_company_field_value.field_id == db.crm_company_field.id) & (db.crm_company_field_value.is_active == True) & (db.crm_lead_field_key.id == lRequestData['lead_key_id']) & (db.crm_company_field_value.company_id == lRequestData['company_id'])).select(db.crm_company_field.field_name, db.crm_company_field_value.field_value).as_list()
+	return data
+	pass
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def fetch_lead_update_details(LRequestData):
+	
+	rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time, orderby=~db.crm_lead_updates.db_entry_time).as_list()
+	return rows
+	pass
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 def delete_leads():
