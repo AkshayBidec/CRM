@@ -338,6 +338,7 @@ db.define_table(
 db.define_table(
     'crm_deal_field_key',
     Field('company_id',type='integer',required=True,notnull=True),
+    Field('lead_key_id',db.crm_lead_field_key),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
