@@ -160,7 +160,7 @@ if configuration.get('scheduler.enabled'):
 
 db.define_table(
     'crm_company_field_key',
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -206,7 +206,7 @@ db.define_table(
 db.define_table(
     'crm_contact_field_key',
     Field('company_key_id',type='integer',required=False,notnull=False),
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -252,7 +252,7 @@ db.define_table(
 db.define_table(
     'crm_lead_field_key',
     Field('contact_key_id',db.crm_contact_field_key),
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -274,7 +274,6 @@ db.define_table(
 
 db.define_table(
     'crm_lead_status',
-    Field('user_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('company_id',type='integer',required=True,notnull=True),
     Field('lead_key_id',db.crm_lead_field_key),
@@ -288,7 +287,6 @@ db.define_table(
 
 db.define_table(
     'crm_lead_updates',
-    Field('user_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('company_id',type='integer',required=True,notnull=True),
     Field('lead_key_id',db.crm_lead_field_key),
@@ -339,7 +337,7 @@ db.define_table(
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DEAL
 db.define_table(
     'crm_deal_field_key',
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -366,6 +364,7 @@ db.define_table(
 db.define_table(
     'crm_deal_field_value',
     Field('field_id',db.crm_deal_field),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('deal_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
@@ -379,7 +378,7 @@ db.define_table(
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ EVENT
 db.define_table(
     'crm_events_field_key',
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -405,6 +404,7 @@ db.define_table(
 db.define_table(
     'crm_events_field_value',
     Field('field_id',db.crm_events_field),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('event_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
@@ -418,7 +418,7 @@ db.define_table(
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CAMPAIGN
 db.define_table(
     'crm_campaign_field_key',
-    Field('user_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -445,6 +445,7 @@ db.define_table(
 db.define_table(
     'crm_campaign_field_value',
     Field('field_id',db.crm_campaign_field),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('campaign_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('field_value',type='string',length=1000,required=True,notnull=True),
@@ -473,6 +474,7 @@ db.define_table(
     'crm_audit_trail_value',
     Field('audit_trail_id',db.crm_audit_trail),
     Field('session_id',type='integer',required=True,notnull=True),
+    Field('company_id',type='integer',required=True,notnull=True),
     Field('col_name',type='string',length=500,required=True,notnull=True),
     Field('old_value',type='string',length=1000,required=True,notnull=True),
     Field('new_value',type='string',length=1000,required=True,notnull=True),
