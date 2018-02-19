@@ -151,7 +151,7 @@ def add_contact(data):
 	try:
 		lKeyId=db.crm_contact_field_key.insert(
 				company_key_id=data['data']['company_key_id'],
-				user_id=data['data']['user_id'] ,
+				company_id=data['data']['company_id'] ,
 				db_entry_time=lambda:datetime.now(),
 				db_entered_by=data['data']['user_id'],
 				session_id=data['data']['session_id']
