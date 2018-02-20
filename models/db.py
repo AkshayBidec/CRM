@@ -53,8 +53,8 @@ else:
 # none otherwise. a pattern can be 'controller/function.extension'
 # -------------------------------------------------------------------------
 response.generic_patterns = [] 
-if request.is_local and not configuration.get('app.production'):
-    response.generic_patterns.append('*')
+# if request.is_local and not configuration.get('app.production'):
+response.generic_patterns.append('*')
 
 # -------------------------------------------------------------------------
 # choose a style for forms
@@ -161,6 +161,7 @@ if configuration.get('scheduler.enabled'):
 db.define_table(
     'crm_company_field_key',
     Field('company_id',type='integer',required=True,notnull=True),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -206,6 +207,7 @@ db.define_table(
 db.define_table(
     'crm_contact_field_key',
     Field('company_key_id',type='integer',required=False,notnull=False),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
     Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
@@ -253,6 +255,7 @@ db.define_table(
     'crm_lead_field_key',
     Field('contact_key_id',db.crm_contact_field_key),
     Field('company_id',type='integer',required=True,notnull=True),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -339,6 +342,7 @@ db.define_table(
     'crm_deal_field_key',
     Field('company_id',type='integer',required=True,notnull=True),
     Field('lead_key_id',db.crm_lead_field_key),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -381,6 +385,7 @@ db.define_table(
     'crm_events_field_key',
     Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
@@ -421,6 +426,7 @@ db.define_table(
     'crm_campaign_field_key',
     Field('company_id',type='integer',required=True,notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),

@@ -120,12 +120,12 @@ def add_company(data):
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
-def ajax_company_list(lCompanyName):
+def ajax_company_list(lCompanyName,lSessionCompanyId):
 	data = '%'+lCompanyName+'%'
 	lCompanyList = {}
-	rows = db((db.crm_company_field.id == db.crm_company_field_value.field_id) & (db.crm_company_field.field_name == 'company_name') & (db.crm_company_field_value.is_active == True) & (db.crm_company_field_value.field_value.like(data,case_sensitive=False))).select(db.crm_company_field_value.field_value,db.crm_company_field_value.company_id)
+	rows = db((db.crm_company_field.id == db.crm_company_field_value.field_id) & (db.crm_company_field.field_name == 'company_name') & (db.crm_company_field_value.is_active == True) & (db.crm_company_field_value.field_value.like(data,case_sensitive=False)) & (db.crm_company_field_value.company_id == lSessionCompanyId)).select(db.crm_company_field_value.field_value,db.crm_company_field_value.company_key_id)
 	for row in rows:
-		lCompanyList[str(row.company_id)] = row.field_value
+		lCompanyList[str(row.company_key_id)] = row.field_value
 		pass
 	return lCompanyList
 	pass
@@ -134,7 +134,7 @@ def ajax_company_list(lCompanyName):
 @service.xmlrpc
 def ajax_company_details(lCompanyId):
 	lCompanyDetails = {}
-	rows = db((db.crm_company_field.id == db.crm_company_field_value.field_id) & (db.crm_company_field_value.company_id == lCompanyId)).select(db.crm_company_field.field_name,db.crm_company_field_value.field_value)
+	rows = db((db.crm_company_field.id == db.crm_company_field_value.field_id) & (db.crm_company_field_value.company_key_id == lCompanyId)).select(db.crm_company_field.field_name,db.crm_company_field_value.field_value)
 	for row in rows:
 		lCompanyDetails[row.crm_company_field.field_name] = row.crm_company_field_value.field_value
 		pass

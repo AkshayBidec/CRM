@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{{include 'web2py_ajax.html'}}
+
+<style>
+#suggestions { position: relative; }
+.suggestions { background: white; border: solid 1px #55A6C8; }
+.suggestions DIV { padding: 2px 4px 2px 4px; }
+</style>
+</head>
+<body>
+<form>
+
+ <input type="text" id="month" name="month" style="width: 250px"  autocomplete="off" /><br />
+ <div style="position: absolute;" id="suggestions"
+      class="suggestions">hi</div>
+</form>
+<script>
+jQuery("#month").keyup(function(){
+      ajax('{{=URL("../../../CRM/test/month_selector")}}', ['month'], 'suggestions')});
+</script>
+
+</body>
+</html>
+
+
+
+
