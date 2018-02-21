@@ -11,6 +11,7 @@ from xmlrpc.server import SimpleXMLRPCServer
 def string(data):
 	out=data['email_id']+data['password']
 	return out
+	
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 # function to get the field names to show the form
 @service.xmlrpc
@@ -26,6 +27,7 @@ def company_add_ff():
 
 		del field_names['field']
 		return dict(field_names)
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def company_edit_ff(company_key_id):
@@ -51,6 +53,7 @@ def company_edit_ff(company_key_id):
 
 		del field_names['field']
 		return dict(field_names)
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def get_company(lLimit):	# limit is a dict 

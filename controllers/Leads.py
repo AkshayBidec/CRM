@@ -5,6 +5,8 @@ from xmlrpc.server import SimpleXMLRPCServer
 service = Service(globals())
 import _pickle as cPickle
 from dateutil import relativedelta
+import calendar
+
 
 #import xmlrpc.client as xmlrpclib
 
@@ -269,8 +271,7 @@ def fetch_lead_update_details(lRequestData):
 	try:
 		i=0
 		lData={}
-		rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time,
-			db.crm_lead_updates.db_entered_by, orderby=~db.crm_lead_updates.db_entry_time).as_list()
+		rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time,db.crm_lead_updates.db_entered_by, orderby=~db.crm_lead_updates.db_entry_time).as_list()
 	except Exception as e:
 		return e
 
@@ -327,7 +328,7 @@ def add_lead_update_details(lRequestData):
 	else:
 		i=0
 		lData={}
-		rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time, orderby=~db.crm_lead_updates.db_entry_time).as_list()
+		rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time,db.crm_lead_updates.db_entered_by, orderby=~db.crm_lead_updates.db_entry_time).as_list()
 
 		for row in rows:
 			lData[str(i)]=row
@@ -360,29 +361,29 @@ def add_lead_update_details(lRequestData):
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
-def edit_lead_update_details(lRequestData):
+# def edit_lead_update_details(lRequestData):
 	
-	# have to add the data into the lead update table
-	try:		
-		db(db.crm_lead_updates.id==lRequestData['lead_update_id'])(b.crm_lead_updates.company_id==lRequestData['company_id']).update(
-			update_data=lRequestData['update_data'],
-			db_update_time=lambda:datetime.now(),
-			db_updated_by=lRequestData['user_id']
-			)
-	except Exception as e:
-		return e
+# 	# have to add the data into the lead update table
+# 	try:		
+# 		db(db.crm_lead_updates.id==lRequestData['lead_update_id'])(b.crm_lead_updates.company_id==lRequestData['company_id']).update(
+# 			update_data=lRequestData['update_data'],
+# 			db_update_time=lambda:datetime.now(),
+# 			db_updated_by=lRequestData['user_id']
+# 			)
+# 	except Exception as e:
+# 		return e
 
-	else:
-		rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time, orderby=~db.crm_lead_updates.db_entry_time).as_list()
+# 	else:
+# 		rows = db((db.crm_lead_updates.update_head == lRequestData['update_head']) & (db.crm_lead_updates.lead_status_id == db.crm_lead_status_master.id) & (db.crm_lead_updates.lead_key_id == lRequestData['lead_key_id']) & (db.crm_lead_updates.is_active == True) & (db.crm_lead_updates.company_id == lRequestData['company_id'])).select(db.crm_lead_updates.company_id, db.crm_lead_updates.lead_key_id, db.crm_lead_updates.lead_status_id, db.crm_lead_updates.update_head, db.crm_lead_updates.update_data, db.crm_lead_updates.db_entry_time, orderby=~db.crm_lead_updates.db_entry_time).as_list()
 		
-		i=0
-		lData={}
-		for row in rows:
-			lData[str(i)]=row
-			lData[str(i)]['db_entry_time']=lData[str(i)]['db_entry_time'].strftime("%Y-%m-%d  %H:%M:%S")
-			i+=1
+# 		i=0
+# 		lData={}
+# 		for row in rows:
+# 			lData[str(i)]=row
+# 			lData[str(i)]['db_entry_time']=lData[str(i)]['db_entry_time'].strftime("%Y-%m-%d  %H:%M:%S")
+# 			i+=1
 
-	return lData
+# 	return lData
 	
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
@@ -401,7 +402,6 @@ def fetch_lead_status_details():
 	'respose':1
 	}
 	lData={}
-
 	rows = db((db.crm_lead_status.lead_key_id==lRequestData['lead_key_id'])&
 			(db.crm_lead_status.company_id==lRequestData['company_id'])&
 			(db.crm_lead_status.lead_status_master_id==db.crm_lead_status_master.id)
@@ -413,15 +413,22 @@ def fetch_lead_status_details():
 				).as_list()
 	
 	i=0
-	lData={}
 	for row in rows:
 		lData[str(i)]=row
-		lData[str(i)]['db_entry_time']=lData[str(i)]['db_entry_time'].strftime("%y-%m-%d  %H:%M:%S")
+		time=datetime.now()
+		lDuration=relativedelta.relativedelta(time, lData[str(i)]['crm_lead_status']['db_entry_time'])
+		# if the duration is less than a week
+		if lDuration.days<=7:
+			day=calendar.day_name[lData[str(i)]['crm_lead_status']['db_entry_time'].weekday()]
+			lData[str(i)]['crm_lead_status']['db_entry_time']=str(day)+str(lData[str(i)]['crm_lead_status']['db_entry_time'].strftime(",  %H:%M:%S"))
+		
+		else:
+			lData[str(i)]['crm_lead_status']['db_entry_time']=lData[str(i)]['crm_lead_status']['db_entry_time'].strftime("%Y-%m-%d,  %H:%M:%S")
+		
 		i+=1
-
 	
 
-	return locals()
+	return lData
 	
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -473,11 +480,20 @@ def add_lead_status_details(lRequestData):
 						).as_list()
 			
 			i=0
-			lData={}
 			for row in rows:
 				lData[str(i)]=row
-				lData[str(i)]['db_entry_time']=lData[str(i)]['db_entry_time'].strftime("%y-%m-%d  %H:%M:%S")
+				time=datetime.now()
+				lDuration=relativedelta.relativedelta(time, lData[str(i)]['crm_lead_status']['db_entry_time'])
+				# if the duration is less than a week
+				if lDuration.days<=7:
+					day=calendar.day_name[lData[str(i)]['crm_lead_status']['db_entry_time'].weekday()]
+					lData[str(i)]['crm_lead_status']['db_entry_time']=str(day)+str(lData[str(i)]['crm_lead_status']['db_entry_time'].strftime(",  %H:%M:%S"))
+				
+				else:
+					lData[str(i)]['crm_lead_status']['db_entry_time']=lData[str(i)]['crm_lead_status']['db_entry_time'].strftime("%Y-%m-%d,  %H:%M:%S")
+				
 				i+=1
+	
 
 
 			return lData
