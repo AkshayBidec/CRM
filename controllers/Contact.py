@@ -21,6 +21,7 @@ def contact_add_ff():
 
 		del field_names['field']
 		return dict(field_names)
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def contact_edit_ff(contact_key_id):
@@ -131,13 +132,93 @@ def get_contact(lLimit):	# limit is a dict
 				'Phone':str(contact_data[5]['field_value']),
 				'Type Of Contact':contact_data[4]['field_value'],
 				'Designation':contact_data[2]['field_value'],
-				'Department':contact_data[3]['field_value']
+				'Department':contact_data[3]['field_value'],
+				'contact_key_id':keys[i].id
 			}
 
 	except Exception as e:
 		return 'error in getting data (%s)' %e
 	else:
 		return dict(data)
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def fetch_contact_basic_details(lRequestData):
+	
+	# ={}
+	# lRequestData={
+	# 	'contact_key_id':30,
+	# 	'user_id': 2,
+	# 	'company_id':25,
+	# 	'update_head': "notes"
+	# }
+
+
+	data = {}
+	data['contact_details'] = db(
+		(db.crm_contact_field_key.id == db.crm_contact_field_value.contact_key_id) & 
+		(db.crm_contact_field_value.field_id == db.crm_contact_field.id) & 
+		(db.crm_contact_field_key.id == lRequestData['contact_key_id']) & 
+		(db.crm_contact_field_value.is_active == True) & 
+		(db.crm_contact_field_value.company_id == lRequestData['company_id'])
+		).select(
+		db.crm_contact_field.field_name, 
+		db.crm_contact_field_value.field_value
+		).as_list()
+	
+	data['company_details'] = db(
+		(db.crm_contact_field_key.id == lRequestData['contact_key_id'])& 
+		(db.crm_contact_field_key.company_key_id == db.crm_company_field_value.company_key_id) & 
+		(db.crm_company_field_value.field_id == db.crm_company_field.id) & 
+		(db.crm_company_field_value.is_active == True) & 
+		(db.crm_company_field_value.company_id == lRequestData['company_id'])
+		).select(
+		db.crm_company_field.field_name, 
+		db.crm_company_field_value.field_value
+		).as_list()
+	
+
+
+	
+	# contact donot have the comapny details
+	# send a basic default dictionary for that
+	if len(data['company_details'])<=0:
+		data['company_details']=[
+		{'crm_company_field'	:	{'field_name'	:	'company_name'},
+		'crm_company_field_value'	:	{'field_value'	:	'- Company Name -'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'type_of_industry'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'website'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'phone_no'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'fax_no'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'street'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'state'},
+		'crm_company_field_value'	:{	'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'city'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'pincode'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		},
+		{'crm_company_field'	:	{'field_name'	:	'country'},
+		'crm_company_field_value'	:	{'field_value'	:	'NA'}
+		}
+		]
+	test=data['company_details'][0]
+
+	return data
+	pass
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
@@ -187,6 +268,7 @@ def add_contact(data):
 	if done==1:
 		lReturnDict['msg']=' contact done '
 	return lReturnDict	
+
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def add_contact_company_key_id(data):
@@ -213,7 +295,6 @@ def add_contact_company_key_id(data):
 	if done==1:
 		lReturnDict['msg']=' contact updated '
 	return lReturnDict	
-
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
@@ -270,11 +351,9 @@ def ajax_contact_details(lContactId):
 	pass
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 def call(): return service() 
 
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
 def autocomplete():
 	if not request.vars.data: return ''

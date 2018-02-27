@@ -1,0 +1,86 @@
+
+      <div class="container-fluid" id="sec_design_basis">
+        <div class="margin-tp-20">
+          <div class="sec_head">
+            <h3>P &amp; I Diagrams Upload</h3>
+          </div>
+          
+           <div class="#">
+            <!-- Already added notes -->
+            <table class="table table-striped" id="pi_diagram_upload_table">
+            <thead>
+            <tr>
+                <th>Version</th>
+                <th>File</th>
+                <th>Description</th>
+                <!-- <th>Version NO</th> -->
+                <th>Added Time</th>
+                <th>Added By</th>
+            </tr>
+            </thead>
+       
+            <tbody>
+       
+                   {{  if len(data)>0:
+                
+                      for key in data.keys():
+                          response.write("<tr >",escape=False)
+                          response.write("<td>%s</td>"%data[key]['file_version'],escape=False)
+                          response.write("<td><a href='%s'>%s</a></td>"  %(URL('download',args=data[key]['update_file']) , data[key]['update_file_name']),escape=False)
+                          response.write("<td>%s</td>"%data[key]['update_data'],escape=False)
+                          response.write("<td>%s</td>"%data[key]['db_entry_time'],escape=False)
+                          response.write("<td>%s</td>"%data[key]['db_entered_by'],escape=False)
+                          response.write("</tr>",escape=False)
+                          pass
+                          
+              }}
+              {{ else:}}
+                <tr><td colspan=8 class="text-center">Add New Diagram!</td></tr>
+              {{pass}}
+            
+            </tbody>
+            
+            </table>
+
+          <div class="form-group col-md-6 col-lg-6 col-xs-6 col-sm-6">
+            <div class="margin-10 text-right">
+              <div class="form-group">
+                <div class="input-group input-file" name="Fichier1">
+           
+                   <form action="" enctype="multipart/form-data" method="post">
+                      <div class="row">
+
+                      <input name="_formname" type="hidden" value="pi_diagram_upload">
+
+
+                      <div class="form-group col-md-6 col-lg-6 col-xs-6 col-sm-6">
+                          <label for="exampleInputEmail1">Select File</label>
+                          <input class="upload" name="update_file" type="file">
+                      </div>
+
+                      
+                      <div class="form-group col-md-6 col-lg-6 col-xs-6 col-sm-6">
+                          <label for="exampleInputEmail1">Description</label>
+                          <textarea  class="string" name="description" type="text-area" value=""></textarea>
+                      </div>
+
+                      <div class="form-group col-md-6 col-lg-6 col-xs-6 col-sm-6">
+                          <label for="exampleInputEmail1">Version NO</label>
+                          <input class="integer" name="version" type="text" value="">
+                      </div>
+
+                      <input type="submit" value="Submit">
+                      <style>
+                                #suggestions { position: relative; }
+                                .suggestions { background: white; border: solid 1px #55A6C8; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; }
+                                .suggestions DIV { padding: 2px 4px 2px 4px; cursor: pointer;}
+                      </style>
+                      </div>
+                    </form>
+              
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- sec P&I diagram khatam -->
