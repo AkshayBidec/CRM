@@ -182,6 +182,7 @@ db.define_table(
     Field('field_requires_attributes',type='string',length=500,required=False,notnull=False),
     Field('field_suggestion_attributes',type='string',length=500,required=False,notnull=False),            
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('filter_flag', type='boolean', default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
@@ -229,6 +230,7 @@ db.define_table(
     Field('field_requires_attributes',type='string',length=500,required=False,notnull=False),
     Field('field_suggestion_attributes',type='string',length=500,required=False,notnull=False),            
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('filter_flag', type='boolean', default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
@@ -277,6 +279,8 @@ db.define_table(
 
 db.define_table(
     'crm_lead_status',
+    Field('activity',type='string',length=250, required=False, notnull=False),
+    Field('current_stage',type='integer',default=0,required=True, notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('company_id',type='integer',required=True,notnull=True),
     Field('lead_key_id',db.crm_lead_field_key),
@@ -284,6 +288,7 @@ db.define_table(
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_entered_by_name', type='string',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
@@ -296,9 +301,15 @@ db.define_table(
     Field('lead_status_id',db.crm_lead_status_master),
     Field('update_head',type='string',length=1000,required=False,notnull=False),
     Field('update_data',type='string',length=2000,required=False,notnull=False),
+    Field('update_file_name',type='string',length=1000,required=False,notnull=False),
+    Field('update_file',type='upload',required=False,notnull=False),
+    Field('head_version',type='integer',required=False,notnull=False),
+    Field('title',type='string',required=False,notnull=False),
+    Field('head_id',type='integer',required=False,notnull=False),
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_entered_by_name',type='string',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
@@ -317,6 +328,7 @@ db.define_table(
     Field('field_requires_attributes',type='string',length=500,required=False,notnull=False),
     Field('field_suggestion_attributes',type='string',length=500,required=False,notnull=False),            
     Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('filter_flag', type='boolean', default=True, required=True, notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
     Field('db_update_time', type='datetime', notnull=False),
@@ -343,6 +355,7 @@ db.define_table(
     Field('company_id',type='integer',required=True,notnull=True),
     Field('lead_key_id',db.crm_lead_field_key),
     Field('is_active', type='boolean', default=True, required=True, notnull=True),
+    Field('filter_flag', type='boolean', default=True, required=True, notnull=True),
     Field('session_id',type='integer',required=True,notnull=True),
     Field('db_entry_time', type='datetime',  required=True, notnull=True),
     Field('db_entered_by', type='integer',required=False,notnull=False),
@@ -379,6 +392,45 @@ db.define_table(
     Field('db_update_time', type='datetime', notnull=False),
     Field('db_updated_by',type='integer',required=False,notnull=False)
 )
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  WATER TEST
+
+db.define_table(
+    'crm_water_test_field',
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('feature_id',type='integer', required=False,notnull=False),
+    Field('sequence_no',type='integer',default=0,required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('form_name',type='string',length=250,required=True,notnull=True),
+    Field('field_name',type='string',length=500,required=False,notnull=False),
+    Field('field_widget_attributes',type='string',length=500,required=False,notnull=False),
+    Field('field_requires_attributes',type='string',length=500,required=False,notnull=False),
+    Field('field_suggestion_attributes',type='string',length=500,required=False,notnull=False),            
+    Field('is_active',type='boolean',default=True, required=True, notnull=True),
+    Field('filter_flag', type='boolean', default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
+db.define_table(
+    'crm_water_test_value',
+    Field('field_id',db.crm_water_test_field),
+    Field('key_id', type='integer',required=False,notnull=False),
+    Field('key_reference', type='string',required=False,notnull=False),
+    Field('update_key', type='integer',required=False,notnull=False),
+    Field('update_referece', type='string',required=False,notnull=False),
+    Field('test_title', type='string',required=False,notnull=False),
+    Field('test_value', type='string',required=False,notnull=False),
+    Field('company_id',type='integer',required=True,notnull=True),
+    Field('session_id',type='integer',required=True,notnull=True),
+    Field('is_active', type='boolean', default=True, required=True, notnull=True),
+    Field('db_entry_time', type='datetime',  required=True, notnull=True),
+    Field('db_entered_by', type='integer',required=False,notnull=False),
+    Field('db_update_time', type='datetime', notnull=False),
+    Field('db_updated_by',type='integer',required=False,notnull=False)
+)
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ EVENT
 db.define_table(

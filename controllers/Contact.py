@@ -95,52 +95,339 @@ def edit_contact(data):
 	if done==1:
 		lReturnDict['msg']=' contact done '
 	return lReturnDict	
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+# fucntion to get the form field for the filter 
+@service.xmlrpc
+def contact_filter_field():
+		lFinalFilterFields={}
+		field_names={'field':'value'}
+		rows = db(db.crm_company_field.is_active==True).select()
+		lList=[]
+		for row in rows:
+
+			lList=[row.field_widget_attributes,row.field_requires_attributes] 		# make a list of required details for the field
+
+			field_names.update({row.field_name:lList})
+
+		del field_names['field']
+		lFinalFilterFields['Company']=field_names
+
+		field_names={'field':'value'}
+		rows = db(db.crm_contact_field.is_active==True).select()
+		lList=[]		# empty the last list
+		for row in rows:
+
+			lList=[row.field_widget_attributes,row.field_requires_attributes] 		# make a list of required details for the field
+
+			field_names.update({row.field_name:lList})
+		del field_names['field']
+		lFinalFilterFields['Contact']=field_names
+
+		return dict(lFinalFilterFields)
+		# return locals()
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
-def get_contact(lLimit):	# limit is a dict 
-
+def get_contact(company_id):	# limit is a dict 
+	# =25
 	# # following data is for the testing only
 	# lLimit={}
 	# lLimit['countTo']=10		# total number of fieds required, replace it with request.vars.* to make it dynamin
 	# lLimit['countFrom']=0		# no of the row to start from 
 	# lLimit['order']='~db.crm_contact_field_key.id' 	# the name of field to order on, string will be evaluated in the api
-
+	data_flag=0
 	try:
-		keys=db(db.crm_contact_field_key).select(orderby=eval(lLimit['order']),limitby=(lLimit['countFrom'],lLimit['countTo']))
+		keys=db((db.crm_contact_field_key.is_active == True) & (db.crm_contact_field_key.company_id == company_id)).select(db.crm_contact_field_key.id,orderby=~db.crm_contact_field_key.id)
 		i=0
 		data={}
 		for  i in range (0,len(keys)):
 
-			company_data= db(db.crm_contact_field_key.id== keys[i].id).select(
-				db.crm_contact_field_key.id,
-				db.crm_company_field_value.field_value,
-				left=db.crm_company_field_value.on(db.crm_company_field_value.company_key_id == keys[i].company_key_id)
-				).as_list()
+			contact_data = db( 
+				(db.crm_contact_field_value.field_id == db.crm_contact_field.id) & 
+				(db.crm_contact_field_value.contact_key_id == keys[i].id) & 
+				(db.crm_contact_field_value.is_active == True) & 
+				(db.crm_contact_field_value.company_id == company_id)
+				).select(
+				db.crm_contact_field.field_name,
+				 db.crm_contact_field_value.field_value
+				 ).as_dict(key='crm_contact_field.field_name')
 
+			company_data = db((db.crm_contact_field_key.company_key_id == db.crm_company_field_value.company_key_id) & (db.crm_company_field_value.field_id == db.crm_company_field.id) & (db.crm_company_field_value.is_active == True) & (db.crm_contact_field_key.id == keys[i].id) & (db.crm_company_field_value.company_id == company_id)).select(db.crm_company_field.field_name, db.crm_company_field_value.field_value).as_dict(key='crm_company_field.field_name')
 			
-			contact_data=db(db.crm_contact_field_value.contact_key_id== keys[i].id).select(
-					db.crm_contact_field_value.field_value,
-					db.crm_contact_field_value.contact_key_id
-					).as_list()
-			
-			# data[str(i)]=company_data
 			data[str(i)]={
-				'Company':company_data[0]['crm_company_field_value']['field_value'],
-				'Name':str(contact_data[0]['field_value'])+' '+str(contact_data[1]['field_value']),
-				'Email':str(contact_data[6]['field_value']),
-				'Phone':str(contact_data[5]['field_value']),
-				'Type Of Contact':contact_data[4]['field_value'],
-				'Designation':contact_data[2]['field_value'],
-				'Department':contact_data[3]['field_value'],
+				'Company': 'NA' if not company_data else company_data['company_name']['crm_company_field_value']['field_value'],
+				'Name':str(contact_data['first_name']['crm_contact_field_value']['field_value'])+' '+str(contact_data['last_name']['crm_contact_field_value']['field_value']),
+				'Email':str(contact_data['email_id']['crm_contact_field_value']['field_value']),
+				'Phone':'NA' if not company_data else str(company_data['phone_no']['crm_company_field_value']['field_value']),
+				'Type of Contact':contact_data['type_of_contact']['crm_contact_field_value']['field_value'],
+				'Designation':str(contact_data['designation']['crm_contact_field_value']['field_value']),
+				'Department':str(contact_data['department']['crm_contact_field_value']['field_value']),
 				'contact_key_id':keys[i].id
 			}
-
+			data_flag=1
+		if len(data)==0:
+			data['0']={
+				'Company':'',
+				'Name':'',
+				'Email':'',
+				'Phone':'',
+				'Type of Contact':'',
+				'Designation':'',
+				'Department':'',
+				'contact_key_id':''
+			}
+			data_flag=0
+		filter_field=contact_filter_field()
 	except Exception as e:
 		return 'error in getting data (%s)' %e
 	else:
-		return dict(data)
+		return dict(data=data,data_flag=data_flag,filter_field=filter_field)
 
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+@service.xmlrpc
+def get_contacts_with_filter(lFilterData):	# limit is a dict 
+	
+	# # Data for the testing
+	# ={'company_id':25,
+	# 	'lFilterOutput':{'Company': ['company_name.startswith("a")'], 'Contact': []} }
+
+
+	data_flag=0
+	lFieldList={}
+	present=['company_name','lead_status','description','lead_source','phone_no','email_id']
+	for condition in lFilterData['lFilterOutput'].keys():
+		for data in lFilterData['lFilterOutput'][condition]:
+			if data.split('.')[0] not in present:
+				name=data.split('.')[0].title()
+				name=name.replace('_',' ')
+				# lFieldList.append(str('"'+name+'"'+' : '+'str('+condition.lower()+'_data['+'"'+data.split('.')[0]+'"'+']["crm_'+condition.lower()+'_field_value"]["field_value"])'))
+				lFieldList[name]=(str('str('+condition.lower()+'_data['+'"'+data.split('.')[0]+'"'+']["crm_'+condition.lower()+'_field_value"]["field_value"])'))
+		pass
+
+
+	try:
+		# get the filter fields to process the data
+		lFilterField=contact_filter_field()
+		data={}
+		lContactIdList=[]
+		lCompanyIdList=[]
+		
+		#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+		if len(lFilterData['lFilterOutput']['Company'])>0: # have company data
+
+			# have to select the contact id to get the contacts list for that
+			lList=lFilterData['lFilterOutput']['Company']
+			lFirstFlag=0
+
+			for lCondition in lList:
+				if lFirstFlag==0:
+
+					rows=db(
+							(db.crm_company_field.id==db.crm_company_field_value.field_id)&
+							(db.crm_company_field.field_name == lCondition.split('.')[0]) &
+							(eval('db.crm_company_field_value.field_value.'+lCondition.split('.')[1]))&
+							(db.crm_company_field_key.is_active == True) & 
+							(db.crm_company_field_key.company_id == lFilterData['company_id'])
+							).select(
+							db.crm_company_field_value.company_key_id
+							)
+					lCompanyIdList=[]
+					for row in rows:
+						lCompanyIdList.append(row.company_key_id)
+
+					lFirstFlag=1
+					pass
+				elif lFirstFlag==1:
+					rows=db(
+							(db.crm_company_field.id==db.crm_company_field_value.field_id)&
+							(db.crm_company_field.field_name == lCondition.split('.')[0]) &
+							(eval('db.crm_company_field_value.field_value.'+lCondition.split('.')[1]))&
+							(db.crm_company_field_value.company_key_id.belongs(lCompanyIdList))
+							).select(
+							db.crm_company_field_value.company_key_id
+							)
+					lCompanyIdList=[]
+					for row in rows:
+						lCompanyIdList.append(row.company_key_id)
+
+					pass
+			#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+			if len(lFilterData['lFilterOutput']['Contact'])>0:	# have contact data
+				lList=lFilterData['lFilterOutput']['Contact']
+				lFirstFlag=0
+
+				for lCondition in lList:
+					if lFirstFlag==0:
+						rows=db(
+								(db.crm_contact_field.id==db.crm_contact_field_value.field_id)&
+								(db.crm_contact_field_key.id==db.crm_contact_field_value.contact_key_id)&
+								(db.crm_contact_field.field_name == lCondition.split('.')[0]) &
+								(eval('db.crm_contact_field_value.field_value.'+lCondition.split('.')[1]))&
+								(db.crm_contact_field_key.company_key_id.belongs(lCompanyIdList))&
+								(db.crm_contact_field_key.is_active == True) & 
+								(db.crm_contact_field_key.company_id == lFilterData['company_id'])
+								).select(
+								db.crm_contact_field_value.contact_key_id
+								)
+						lCompanyIdList=[]
+						for row in rows:
+							lContactIdList.append(row.contact_key_id)
+
+						lFirstFlag=1
+						pass
+					elif lFirstFlag==1:
+						rows=db(
+								(db.crm_contact_field.id==db.crm_contact_field_value.field_id)&
+								(db.crm_contact_field_key.id==db.crm_contact_field_value.contact_key_id)&
+								(db.crm_contact_field.field_name == lCondition.split('.')[0]) &
+								(eval('db.crm_contact_field_value.field_value.'+lCondition.split('.')[1]))&
+								(db.crm_contact_field_value.contact_key_id.belongs(lContactIdList))
+								).select(
+								db.crm_contact_field_value.contact_key_id
+								)
+						lCompanyIdList=[]
+						for row in rows:
+							lContactIdList.append(row.contact_key_id)
+						test=lCompanyIdList
+						pass
+			
+			#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+			else: 		# no contact data
+				# in this we donot have a filter on the contact data, but we have for the company data
+				lContactIdList=[]
+				rows=db((db.crm_contact_field_key.company_key_id.belongs(lCompanyIdList))&
+						(db.crm_contact_field_key.is_active == True) & 
+						(db.crm_contact_field_key.company_id == lFilterData['company_id'])
+						).select(
+						db.crm_contact_field_key.id
+						)
+				for row in rows:
+					lContactIdList.append(row.id)
+
+				pass
+			
+			pass
+		
+		#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+		else:		# no company data
+
+			#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+			if len(lFilterData['lFilterOutput']['Contact'])>0:	# have contact data
+
+				lList=lFilterData['lFilterOutput']['Contact']
+				lFirstFlag=0
+				for lCondition in lList:
+					if lFirstFlag==0:
+						rows=db(
+								(db.crm_contact_field.id==db.crm_contact_field_value.field_id)&
+								(db.crm_contact_field_key.id==db.crm_contact_field_value.contact_key_id)&
+								(db.crm_contact_field.field_name == lCondition.split('.')[0]) &
+								(eval('db.crm_contact_field_value.field_value.'+lCondition.split('.')[1]))&
+								(db.crm_contact_field_key.is_active == True) & 
+								(db.crm_contact_field_key.company_id == lFilterData['company_id'])
+								).select(
+								db.crm_contact_field_value.contact_key_id
+								)
+						lContactIdList=[]
+						for row in rows:
+							lContactIdList.append(row.contact_key_id)
+
+						lFirstFlag=1
+						pass
+					elif lFirstFlag==1:
+						rows=db(
+								(db.crm_contact_field.id==db.crm_contact_field_value.field_id)&
+								(db.crm_contact_field_key.id==db.crm_contact_field_value.contact_key_id)&
+								(db.crm_contact_field.field_name == lCondition.split('.')[0]) &
+								(eval('db.crm_contact_field_value.field_value.'+lCondition.split('.')[1]))&
+								(db.crm_contact_field_value.contact_key_id.belongs(lContactIdList))
+								).select(
+								db.crm_contact_field_value.contact_key_id
+								)
+						lCompanyIdList=[]
+						for row in rows:
+							lContactIdList.append(row.contact_key_id)
+
+				
+				pass
+			#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+			else: 		# no contact data
+				# this condition is not posible as there is no filters, but still for safety
+				rows=db((db.crm_lead_field_key.is_active == True) & 
+						(db.crm_lead_field_key.company_id == lFilterData['company_id'])
+						).select(
+						db.crm_lead_field_key.id,
+						orderby=~db.crm_lead_field_key.id
+						)
+				lLeadIdList=[]
+				for row in rows:
+					lLeadIdList.append(row.lead_key_id)
+
+			pass
+
+		# END #
+		#∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞	
+		i=0
+
+		for key in sorted(lContactIdList):
+
+			contact_data = db( 
+				(db.crm_contact_field_value.field_id == db.crm_contact_field.id) & 
+				(db.crm_contact_field_value.contact_key_id == key) & 
+				(db.crm_contact_field_value.is_active == True) & 
+				(db.crm_contact_field_value.company_id == lFilterData['company_id'])
+				).select(
+				db.crm_contact_field.field_name,
+				 db.crm_contact_field_value.field_value
+				 ).as_dict(key='crm_contact_field.field_name')
+
+			company_data = db(
+				(db.crm_contact_field_key.company_key_id == db.crm_company_field_value.company_key_id) & 
+				(db.crm_contact_field_key.id == key) & 
+				(db.crm_company_field_value.field_id == db.crm_company_field.id) & 
+				(db.crm_company_field_value.is_active == True) & 
+				(db.crm_company_field_value.company_id == lFilterData['company_id'])
+				).select(
+				db.crm_company_field.field_name, 
+				db.crm_company_field_value.field_value).as_dict(key='crm_company_field.field_name')
+			
+			data[str(i)]={
+				'Company': 'NA' if not company_data else company_data['company_name']['crm_company_field_value']['field_value'],
+				'Name':str(contact_data['first_name']['crm_contact_field_value']['field_value'])+' '+str(contact_data['last_name']['crm_contact_field_value']['field_value']),
+				'Email':str(contact_data['email_id']['crm_contact_field_value']['field_value']),
+				'Phone':'NA' if not company_data else str(company_data['phone_no']['crm_company_field_value']['field_value']),
+				'Type of Contact':contact_data['type_of_contact']['crm_contact_field_value']['field_value'],
+				'Designation':str(contact_data['designation']['crm_contact_field_value']['field_value']),
+				'Department':str(contact_data['department']['crm_contact_field_value']['field_value']),
+				'contact_key_id':str(key)
+			}
+			for key in lFieldList:
+				data[str(i)][key]=eval(lFieldList[key])
+				pass
+			data_flag=1
+			i+=1
+			pass
+
+		if len(data)==0:
+			data[str(i)]={
+				'Company':'',
+				'Name':'',
+				'Email':'',
+				'Phone':'',
+				'Type of Contact':'',
+				'Designation':'',
+				'Department':'',
+				'contact_key_id':''
+			}
+			data_flag=0
+		filter_field=contact_filter_field()
+
+		return dict(filter_field=lFilterField,data=data,data_flag=data_flag)
+
+	except Exception as e:
+		return 'Exception Raised : '+str(e)
+	# else: # not needed exactly
+	# 	return locals()
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 @service.xmlrpc
 def fetch_contact_basic_details(lRequestData):
